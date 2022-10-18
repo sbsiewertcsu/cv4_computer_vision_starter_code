@@ -7,16 +7,19 @@ CFLAGS= -O0 -g $(INCLUDE_DIRS) $(CDEFS)
 LIBS= -L/usr/lib -lopencv_core -lopencv_flann -lopencv_video -lrt
 
 HFILES= 
-CFILES= capture.cpp ipcapture.cpp diffcapture.cpp brighten.cpp
+CFILES= capture.cpp ipcapture.cpp diffcapture.cpp brighten.cpp gstream_cap.cpp
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.cpp=.o}
 
-all:	capture ipcapture diffcapture brighten
+all:	capture ipcapture diffcapture brighten gstream_cap
 
 clean:
 	-rm -f *.o *.d
-	-rm -f capture ipcapture diffcapture brighten
+	-rm -f capture ipcapture diffcapture brighten gstream_cap
+
+gstream_cap: gstream_cap.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o `pkg-config --libs opencv4` $(LIBS)
 
 capture: capture.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o `pkg-config --libs opencv4` $(LIBS)
