@@ -6,6 +6,13 @@ double alpha=1.0;  int beta=10;  /* contrast and brightness control */
 
 int main( int argc, char** argv )
 {
+    // Check command line arguments
+    if(argc < 2) 
+    {
+	    printf("Usage: brighten <input-file>\n");
+        exit(-1);
+    }
+
     Mat image = imread( argv[1] ); // read in image file
     Mat new_image = Mat::zeros( image.size(), image.type() );
     std::cout<<"* Enter alpha brighten factor [1.0-3.0]: ";std::cin>>alpha;
