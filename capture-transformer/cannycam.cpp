@@ -58,14 +58,15 @@ int main( int argc, char** argv )
    cam0.set(CAP_PROP_FRAME_WIDTH, 640);
    cam0.set(CAP_PROP_FRAME_HEIGHT, 480);
 
+   namedWindow( window_name, WINDOW_AUTOSIZE );
+   createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
+
+
    while (1)
    {
       cam0.read(frame);
 
       imshow("video_display", frame);
-
-      namedWindow( window_name, WINDOW_AUTOSIZE );
-      createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
 
       CannyThreshold(0, 0);
 
