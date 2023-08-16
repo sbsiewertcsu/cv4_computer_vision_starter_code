@@ -20,7 +20,8 @@ using namespace cv;
 
 //#define SHOW_DIFF
 
-#define DELAY_IN_MSEC (15)
+//#define DELAY_IN_MSEC (15)
+#define DELAY_IN_MSEC (1)
 
 #define DIRECTORY_DETECT ("/tmp/")
 #define DIRECTORY_COLLECT ("/tmp/")
@@ -38,7 +39,8 @@ int currentMotionTrigger = 10;
 
 bool running = true;
 
-typedef struct {
+typedef struct 
+{
   bool isMotion;
   Scalar mean;
   Scalar stddev;
@@ -48,7 +50,8 @@ typedef struct {
 // Check if the directory exists, if not create it
 // This function will create a new directory if the image is the first
 // image taken for a specific day
-inline void directoryExistsOrCreate(const char* pzPath) {
+inline void directoryExistsOrCreate(const char* pzPath) 
+{
   DIR *pDir;    
   if ( pzPath == NULL || (pDir = opendir (pzPath)) == NULL) { // directory doesn't exists -> create it
     mkdir(pzPath, 0777);    
@@ -89,8 +92,10 @@ inline bool saveImg(Mat image, const string directory,
   return imwrite(ss.str().c_str(), image);
 }
 
+
 // Check if there is motion in the result matrix. Count the number of changes and return.
-inline MotionDetectData_t detectMotion(const Mat &motion, int max_deviation, int triggerCount) {
+inline MotionDetectData_t detectMotion(const Mat &motion, int max_deviation, int triggerCount) 
+{
 
   int rows = motion.rows;
   int cols = motion.cols;
@@ -106,11 +111,15 @@ inline MotionDetectData_t detectMotion(const Mat &motion, int max_deviation, int
   data.isMotion = false;
   
   meanStdDev(motion, data.mean, data.stddev);
+
   // if not to much changes then the motion is real
-  if (data.stddev[0] < max_deviation) {
-    // loop over image and detect changes
-    for (int j = 0; j < rows; j+=1) { // height
-      for (int i = 0; i < cols; i+=1) { // width
+  if (data.stddev[0] < max_deviation) 
+  {
+    // loop over image and detect changes - height
+    for (int j = 0; j < rows; j+=1) 
+    {
+      for (int i = 0; i < cols; i+=1)  // width
+      { 
         // check if at pixel (j,i) intensity is equal to 255 this means that the pixel is different in the sequence of images (prev_frame, current_frame, next_frame)
         if ((motion.at<int>(j,i)) == 255) data.numberOfChanges++;        
       }
@@ -126,6 +135,7 @@ int main (int argc, char * const argv[])
   // Drawing variables for writing to the window
   stringstream drawnStringStream;
   Point textOrg(10, 10);
+  VideoCapture stream;
   
   // Bounding rectangle and contours to visually track target
   Rect boundingR;
@@ -143,26 +153,45 @@ int main (int argc, char * const argv[])
 
   // Erode kernel
   Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2, 2));
-  
-  // Set up camera
-  VideoCapture camera(DEVICE_ID);
+ 
 
-  if (camera.isOpened()) { // check if we succeeded
+  if(argc == 1)
+  {
+      // Set up camera
+      stream.open(DEVICE_ID);
+  }
+  else if(argc == 2)
+  {
+      // Set up video file input
+      stream.open(argv[1]);
+  }
+  else
+  {
+      printf("useage: motion_detect <input-file> OR motion_detect\n");
+      exit(-1);
+  }
+
+  // check if we succeeded opening input stream from camera or video
+  if (stream.isOpened()) 
+  {
     cout << "Successfully opened Device ID " << DEVICE_ID << "!" << endl;
-  } else {
+  }
+  else 
+  {
     cout << "Failed to open Device ID " << DEVICE_ID << "!" << endl;
     exit(EXIT_SUCCESS);
   }
 
   // Set resolution
-  camera.set(CAP_PROP_FRAME_WIDTH, 640);
-  camera.set(CAP_PROP_FRAME_HEIGHT, 480);
+  //stream.set(CAP_PROP_FRAME_WIDTH, 640);
+  //stream.set(CAP_PROP_FRAME_HEIGHT, 480);
 
   // Take image, initialize mats, and convert them to gray
-  camera >> result_saved;
+  stream >> result_saved;
   prevPrevFrame = Mat::zeros(result_saved.size(), result_saved.type());
   prevFrame = Mat::zeros(result_saved.size(), result_saved.type());
   currentFrame = Mat::zeros(result_saved.size(), result_saved.type());
+
 #ifdef SHOW_DIFF
   display = Mat::zeros(Size(result_saved.cols * 2, result_saved.rows * 2), result_saved.type());
 #else
@@ -189,7 +218,10 @@ int main (int argc, char * const argv[])
   while (running)
   {
     // Take a new image
-    camera >> result_saved;
+    stream >> result_saved;
+
+    if (result_saved.empty()) break;
+
     prevFrame.copyTo(prevPrevFrame);
     currentFrame.copyTo(prevFrame);
     result_saved.copyTo(currentFrame);
@@ -203,22 +235,28 @@ int main (int argc, char * const argv[])
     threshold(motion, motion, currentThreshold, 255, THRESH_BINARY);
     erode(motion, motion, kernel_ero);
     
-    motionDetectData = detectMotion(motion(Rect(CAM_WIDTH_OFFSET, 0, 640-(CAM_WIDTH_OFFSET * 2), 480)), currentDeviation, currentMotionTrigger);
+    motionDetectData = detectMotion(motion(Rect(CAM_WIDTH_OFFSET, 0, currentFrame.cols-(CAM_WIDTH_OFFSET * 2), currentFrame.rows)), currentDeviation, currentMotionTrigger);
+    //motionDetectData = detectMotion(motion(Rect(CAM_WIDTH_OFFSET, 0, 640-(CAM_WIDTH_OFFSET * 2), 480)), currentDeviation, currentMotionTrigger);
 
-    /* 
-    * I think it's self-descriptive. We pick 4 different ROIs and copy
-    * the frames we need into them. Piece of cake!
-    */
+
     display = Scalar(0, 0, 0);
     
     result_saved.copyTo(resultTracked);
-    if (motionDetectData.isMotion) {
+
+    if (motionDetectData.isMotion) 
+    {
+
       findContours(motion, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));
-      for( int i = 0; i < contours.size(); i++ ) {
+
+      cout << "Contours: " << contours.size() << endl;
+
+      for( int i = 0; i < contours.size(); i++ ) 
+      {
          boundingR = boundingRect(contours[i]);
          rectangle(resultTracked, boundingR.tl(), boundingR.br(), Scalar(0, 255, 0), 2, LINE_AA , 0);
-       }
+      }
     }
+
     
 #ifdef SHOW_DIFF
     cvtColor(d1, d1, COLOR_GRAY2RGB);
@@ -264,18 +302,20 @@ int main (int argc, char * const argv[])
       numberOfSequence = 0;
     }
 
+ #if 0
     // save every nth frame to compare detected frames to
     if((frameCnt % 10) ==  0)
     {
-      saveImg(result_saved, DIRECTORY_COLLECT, EXTENSION, FILE_FORMAT, frameCnt, 0);
+      saveImg(result_saved, DIRECTORY_COLLECT, EXTENSION, FILE_FORMAT, frameCnt, 1);
     }
+#endif
     
     imshow(WINDOW_NAME, display);
     frameCnt++;
     waitKey (DELAY_IN_MSEC);
   }
   
-  camera.release();
+  stream.release();
   
   return 0;
 }
