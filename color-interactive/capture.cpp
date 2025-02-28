@@ -53,8 +53,7 @@ int main( int argc, char** argv )
 	}
         //if(!frame) break;
 	
-	//cvtColor(mat_frame, mat_gray, CV_RGB2GRAY);
-	cv::cvtColor(mat_frame, mat_gray, CV_BGR2GRAY);
+	cv::cvtColor(mat_frame, mat_gray, COLOR_BGR2GRAY);
 
 	// splits into BGR
         split(mat_frame, mat_component);
@@ -98,7 +97,7 @@ int main( int argc, char** argv )
             imshow("Blue Example", mat_composite);
         }
 
-        char c = cvWaitKey(33);
+        char c = waitKey(10);
         if( c == 'q' ) break;
     }
 
