@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
        thread_count = strtol(argv[1], NULL, 10);  /* Get thread_count from command line */
    }
 
+   //Hello <<<4, thread_count>>>();  
    Hello <<<1, thread_count>>>();  
                       /* Start thread_count threads on GPU, */
 
