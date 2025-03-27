@@ -7,10 +7,26 @@
 #include <sched.h>
 
 
-#define IMG_HEIGHT (3000)
-#define IMG_WIDTH (4000)
-#define NUM_ROW_THREADS (6)
-#define NUM_COL_THREADS (8)
+// 120K Pixel resolution
+#define IMG_HEIGHT (300)
+#define IMG_WIDTH (400)
+
+// 12 Mega Pixel resolution
+//#define IMG_HEIGHT (3000)
+//#define IMG_WIDTH (4000)
+
+// Long benchmark test
+//#define RUNS (1000)
+
+// Short benchmark test
+#define RUNS (30)
+
+//#define NUM_ROW_THREADS (6)
+//#define NUM_COL_THREADS (8)
+
+#define NUM_ROW_THREADS (3)
+#define NUM_COL_THREADS (4)
+
 #define IMG_H_SLICE (IMG_HEIGHT/NUM_ROW_THREADS)
 #define IMG_W_SLICE (IMG_WIDTH/NUM_COL_THREADS)
 
@@ -116,7 +132,7 @@ void *sharpen_thread(void *threadptr)
 
 int main(int argc, char *argv[])
 {
-    int fdin, fdout, bytesRead=0, bytesLeft, i, j, idx, jdx;
+    int fdin, fdout, bytesRead=0, bytesLeft, i, j, idx, jdx, rc;
     UINT64 microsecs=0, millisecs=0;
     unsigned int thread_idx;
     FLOAT temp;
@@ -165,16 +181,16 @@ int main(int argc, char *argv[])
     {
         for(j=0; j<IMG_WIDTH; j++)
         {
-            read(fdin, (void *)&R[i][j], 1); convR[i][j]=R[i][j];
-            read(fdin, (void *)&G[i][j], 1); convG[i][j]=G[i][j];
-            read(fdin, (void *)&B[i][j], 1); convB[i][j]=B[i][j];
+            rc=read(fdin, (void *)&R[i][j], 1); convR[i][j]=R[i][j];
+            rc=read(fdin, (void *)&G[i][j], 1); convG[i][j]=G[i][j];
+            rc=read(fdin, (void *)&B[i][j], 1); convB[i][j]=B[i][j];
         }
     }
     printf("source file %s read\n", argv[1]);
     close(fdin);
 
 
-    for(runs=0; runs < 1000; runs++)
+    for(runs=0; runs < RUNS; runs++)
     {
 
     for(thread_idx=0; thread_idx<(NUM_ROW_THREADS*NUM_COL_THREADS); thread_idx++)
@@ -219,16 +235,16 @@ int main(int argc, char *argv[])
     }
 
     printf("starting sink file %s write\n", argv[2]);
-    write(fdout, (void *)header, 21);
+    rc=write(fdout, (void *)header, 21);
 
     // Write RGB data
     for(i=0; i<IMG_HEIGHT; i++)
     {
         for(j=0; j<IMG_WIDTH; j+=1)
         {
-            write(fdout, (void *)&convR[i][j], 1);
-            write(fdout, (void *)&convG[i][j], 1);
-            write(fdout, (void *)&convB[i][j], 1);
+            rc=write(fdout, (void *)&convR[i][j], 1);
+            rc=write(fdout, (void *)&convG[i][j], 1);
+            rc=write(fdout, (void *)&convB[i][j], 1);
         }
     }
 

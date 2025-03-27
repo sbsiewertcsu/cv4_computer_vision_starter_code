@@ -31,7 +31,7 @@ FLOAT PSF[9] = {-K/8.0, -K/8.0, -K/8.0, -K/8.0, K+1.0, -K/8.0, -K/8.0, -K/8.0, -
 
 int main(int argc, char *argv[])
 {
-    int fdin, fdout, bytesRead=0, bytesLeft, i, j;
+    int fdin, fdout, bytesRead=0, bytesLeft, i, j, rc;
     UINT64 microsecs=0, millisecs=0;
     FLOAT temp;
     
@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
     // Read RGB data
     for(i=0; i<IMG_HEIGHT*IMG_WIDTH; i++)
     {
-        read(fdin, (void *)&R[i], 1); convR[i]=R[i];
-        read(fdin, (void *)&G[i], 1); convG[i]=G[i];
-        read(fdin, (void *)&B[i], 1); convB[i]=B[i];
+        rc=read(fdin, (void *)&R[i], 1); convR[i]=R[i];
+        rc=read(fdin, (void *)&G[i], 1); convG[i]=G[i];
+        rc=read(fdin, (void *)&B[i], 1); convB[i]=B[i];
     }
 
     // Skip first and last row, no neighbors to convolve with
@@ -131,14 +131,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    write(fdout, (void *)header, 21);
+    rc=write(fdout, (void *)header, 21);
 
     // Write RGB data
     for(i=0; i<IMG_HEIGHT*IMG_WIDTH; i++)
     {
-        write(fdout, (void *)&convR[i], 1);
-        write(fdout, (void *)&convG[i], 1);
-        write(fdout, (void *)&convB[i], 1);
+        rc=write(fdout, (void *)&convR[i], 1);
+        rc=write(fdout, (void *)&convG[i], 1);
+        rc=write(fdout, (void *)&convB[i], 1);
     }
 
 
