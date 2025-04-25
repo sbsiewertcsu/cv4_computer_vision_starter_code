@@ -29,18 +29,18 @@ int main(int, char**) {
 	SkinDetector skinDetector;
 	FaceDetector faceDetector;
 	FingerCount fingerCount;
-	time_t startTime, curTime;
+	time_t startTime, curTime, endTime;
     time(&startTime);
     int numFramesCaptured = 0;
     double secElapsed;
     double curFPS;
     double averageFPS = 0.0;
-	cout << "Frame Rate = " << fps << endl;
+	cout << "Frame Rate = " << curFPS << endl;
 	setlogmask(LOG_UPTO (LOG_NOTICE));
 	openlog("Log_tag", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 	syslog(LOG_NOTICE, "Logging");
 	while (true) {
-		time(&start);
+		time(&startTime);
 		videoCapture >> frame;
 		frameOut = frame.clone();
 
@@ -55,7 +55,7 @@ int main(int, char**) {
 		imshow("foreground", foreground);
 		imshow("handMask", handMask);
 		imshow("handDetection", fingerCountDebug);
-		time(&end);
+		time(&endTime);
 		/*double seconds = difftime(end, start);
 		fps = num_frames/seconds;
 		cout << "Frame rate per second = " << fps << endl;*/
