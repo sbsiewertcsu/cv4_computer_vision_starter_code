@@ -17,9 +17,10 @@ all:	main
 
 clean:
 	-rm -f *.o *.d
-	-rm -f main
-main       	: 
-	$(CC) $(CPPFILES) $(CFILES) $(CFLAGS) -o output `pkg-config --libs opencv4` $(LIBS)
+	-rm -f main detector
+
+main  : 
+	$(CC) $(CPPFILES) $(CFILES) $(CFLAGS) -o detector `pkg-config --libs opencv4` $(LIBS)
 
 depend:
 
