@@ -12,13 +12,16 @@ CFILES= capture.cpp
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.cpp=.o}
 
-all:	capture
+all:	capture capture2
 
 clean:
 	-rm -f *.o *.d
-	-rm -f capture
+	-rm -f capture capture2
 
 capture: capture.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o `pkg-config --libs opencv4` $(LIBS)
+
+capture2: capture2.o
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o `pkg-config --libs opencv4` $(LIBS)
 
 depend:
